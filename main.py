@@ -6,6 +6,7 @@ import re
 import os
 import base64
 import datetime
+import pytz
 import requests
 from github import Github
 
@@ -52,7 +53,13 @@ def get_stats():
     timezone = data['data']['timezone']
     start_date = data['data']['start']
     end_date = data['data']['end']
-    duration = start_date[0:10] + ' - ' + end_date[0:10]
+    
+    offset = datetime.datetime.now(pytz.timezone(timezone)).utcoffset();
+    start_tz = datetime.datetime.strptime(start_date, '%Y-%m-%dT%H:%M:%S%z') + offset
+    end_tz = datetime.datetime.strptime(end_date, '%Y-%m-%dT%H:%M:%S%z') + offset
+    
+#     duration = start_date[0:10] + ' - ' + end_date[0:10]
+    duration = start_tz.strftime('%B %d') + ' - ' + end_tz.strftime('%B %d')
 
     lang_list = make_list(data['data']['languages'])
     edit_list = make_list(data['data']['editors'])
