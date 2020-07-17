@@ -34,19 +34,31 @@ def make_graph(percent: float):
     return f"{done_block*int(pc_rnd/4)}{empty_block*int(25-int(pc_rnd/4))}"
 
 
-def get_stats():
-    '''Gets API data and returns markdown progress'''
-    data = requests.get(
-        f"https://wakatime.com/api/v1/users/current/stats/last_7_days?api_key={waka_key}").json()
-    lang_data = data['data']['languages']
+def make_list(data: list):
+    '''Make List'''
     data_list = []
-    for l in lang_data[:5]:
+    for l in data[:5]:
         ln = len(l['name'])
         ln_text = len(l['text'])
         op = f"{l['name']}{' '*(12-ln)}{l['text']}{' '*(20-ln_text)}{make_graph(l['percent'])}   {l['percent']}%"
         data_list.append(op)
-    data = ' \n'.join(data_list)
-    return '```text\n'+this_week()+'\n\n'+data+'\n```'
+    return ' \n'.join(data_list)
+
+def get_stats():
+    '''Gets API data and returns markdown progress'''
+    data = requests.get(
+        f"https://wakatime.com/api/v1/users/current/stats/last_7_days?api_key={waka_key}").json()
+    
+    timezone = data['data']['timezone']
+    start_date = data['data']['start']
+    end_date = data['data']['end']
+    duration = start_date[0:10] + ' - ' + end_date[0:10]
+
+    lang_list = make_list(data['data']['languages'])
+    edit_list = make_list(data['data']['editors'])
+    os_list = make_list(data['data']['operating_systems'])
+
+    return '```text\n⌚︎ Timezone: '+timezone+'\n🔛 Duration: '+duration+'\n\n💬 Languages: \n'+lang_list+'\n\n🔥 Editors: \n'+edit_list+'\n\n💻 Operating Systems: \n'+os_list+'\n```'
 
 
 def decode_readme(data: str):
